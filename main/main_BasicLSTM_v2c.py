@@ -291,12 +291,11 @@ def train(net_id, train_file, dim_image, dim_hidden, n_frame_step, n_epochs, lea
             for ind,feat in enumerate(current_feats_vals):  
                 current_feats[ind][:len(current_feats_vals[ind])] = feat    
                 current_video_masks[ind][:len(current_feats_vals[ind])] = 1 
-                current_captions = current_batch['caption'].values 
             
+            current_captions = current_batch['caption'].values 
             current_caption_ind = map(lambda cap: [wordtoix[word] for word in cap.lower().split(' ') if word in wordtoix], current_captions)  
 
             current_caption_matrix = sequence.pad_sequences(current_caption_ind, padding='post', maxlen=n_frame_step-1) 
-            
             current_caption_matrix = np.hstack( [current_caption_matrix, np.zeros( [len(current_caption_matrix),1]) ] ).astype(int)
 
             
