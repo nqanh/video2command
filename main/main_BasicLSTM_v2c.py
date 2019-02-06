@@ -79,7 +79,7 @@ class V2C():
                 with tf.variable_scope("LSTM2"):  
                     output2, state2 = self.lstm2(tf.concat([padding, output1], 1), state2)
              
-			 for i in range(self.n_lstm_steps): ## Phase 2 => only generate captions
+			for i in range(self.n_lstm_steps): ## Phase 2 => only generate captions
                 
                 if i == 0:
                     current_embed = tf.zeros([self.batch_size, self.dim_hidden])  
@@ -100,12 +100,10 @@ class V2C():
                 indices = tf.expand_dims(tf.range(0, self.batch_size, 1), 1)   
                  
                 concated = tf.concat([indices, labels], 1)
-                
 				onehot_labels = tf.sparse_to_dense(concated, tf.stack([self.batch_size, self.n_words]), 1.0, 0.0)  
                 
                  
                 logit_words = tf.nn.xw_plus_b(output2, self.embed_word_W, self.embed_word_b)  
-              
 				cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=onehot_labels, logits=logit_words)
                  
                 cross_entropy = cross_entropy * caption_mask[:,i]  
