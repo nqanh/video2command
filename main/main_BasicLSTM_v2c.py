@@ -29,7 +29,6 @@ class V2C():
 
         with tf.device("/cpu:0"):
             self.Wemb = tf.Variable(tf.random_uniform([n_words, dim_hidden], -0.1, 0.1), name='Wemb')  
-            print 'Wemb shape: ', self.Wemb.get_shape()   
 
         
         self.lstm1 = tf.contrib.rnn.BasicLSTMCell(dim_hidden)   
@@ -57,11 +56,11 @@ class V2C():
         image_emb = tf.nn.xw_plus_b( video_flat, self.encode_image_W, self.encode_image_b)
         
         image_emb = tf.reshape(image_emb, [self.batch_size, self.n_lstm_steps, self.dim_hidden])     
-     
-		state1 = self.lstm1.zero_state(self.batch_size, tf.float32)  
+        
+        state1 = self.lstm1.zero_state(self.batch_size, tf.float32)  
         state2 = self.lstm2.zero_state(self.batch_size, tf.float32)
         
-		padding = tf.zeros([self.batch_size, self.dim_hidden])
+        padding = tf.zeros([self.batch_size, self.dim_hidden])
         
         probs = []
  
@@ -78,8 +77,8 @@ class V2C():
                 
                 with tf.variable_scope("LSTM2"):  
                     output2, state2 = self.lstm2(tf.concat([padding, output1], 1), state2)
-             
-			for i in range(self.n_lstm_steps): ## Phase 2 => only generate captions
+            
+            for i in range(self.n_lstm_steps): ## Phase 2 => only generate captions
                 
                 if i == 0:
                     current_embed = tf.zeros([self.batch_size, self.dim_hidden])  
@@ -100,11 +99,13 @@ class V2C():
                 indices = tf.expand_dims(tf.range(0, self.batch_size, 1), 1)   
                  
                 concated = tf.concat([indices, labels], 1)
-				onehot_labels = tf.sparse_to_dense(concated, tf.stack([self.batch_size, self.n_words]), 1.0, 0.0)  
+                
+                onehot_labels = tf.sparse_to_dense(concated, tf.stack([self.batch_size, self.n_words]), 1.0, 0.0)  
                 
                  
                 logit_words = tf.nn.xw_plus_b(output2, self.embed_word_W, self.embed_word_b)  
-				cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=onehot_labels, logits=logit_words)
+                
+                cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=onehot_labels, logits=logit_words)
                  
                 cross_entropy = cross_entropy * caption_mask[:,i]  
                  
@@ -223,14 +224,14 @@ def train(net_id, train_file, dim_image, dim_hidden, n_frame_step, n_epochs, lea
     # load train data and get caption
     train_data = load_data(train_file)
     captions = train_data['caption'].values
-   
-	wordtoix, ixtoword, bias_init_vector = preProBuildWordVocab(captions, word_count_threshold=1)
+    
+    wordtoix, ixtoword, bias_init_vector = preProBuildWordVocab(captions, word_count_threshold=1)
 
     ixw_path = output_dir + '/ixtoword.npy'
     #np.save('/home/anguyen/workspace/paper_src/2018.icra.v2c.source/output/ixtoword.npy', ixtoword)
     np.save(ixw_path, ixtoword)
     
-	# log path
+    # log path
     logs_tensor_path = create_folder(output_dir, net_id, 'tensorboard')
     pred_path = create_folder(output_dir, net_id, 'prediction')
     log_plot_path = create_folder(output_dir, net_id, 'plot_loss')
@@ -254,7 +255,7 @@ def train(net_id, train_file, dim_image, dim_hidden, n_frame_step, n_epochs, lea
     # create log writer object
     merged = tf.summary.merge_all()
     train_log = tf.summary.FileWriter(logs_tensor_path, sess.graph)
-	
+    
     saver = tf.train.Saver(write_version = tf.train.SaverDef.V1, max_to_keep=0)  # save in old format for TF1 https://github.com/tensorflow/tensorflow/issues/7159 # max_to_keep = 0 --> keep all saved model
     
     train_op = tf.train.AdamOptimizer(learning_rate).minimize(tf_loss)
@@ -270,7 +271,6 @@ def train(net_id, train_file, dim_image, dim_hidden, n_frame_step, n_epochs, lea
         np.random.shuffle(index)
         
         train_data = train_data.ix[index] 
-		
         current_train_data = train_data.groupby('video_path').apply(lambda x: x.irow(np.random.choice(len(x))))  
         current_train_data = current_train_data.reset_index(drop=True)   
 
@@ -286,16 +286,13 @@ def train(net_id, train_file, dim_image, dim_hidden, n_frame_step, n_epochs, lea
 
             current_feats = np.zeros((batch_size, n_frame_step, dim_image))  
             current_feats_vals = map(lambda vid: np.load(vid), current_videos)   
-			
             current_video_masks = np.zeros((batch_size, n_frame_step))
 
             for ind,feat in enumerate(current_feats_vals):  
                 current_feats[ind][:len(current_feats_vals[ind])] = feat    
                 current_video_masks[ind][:len(current_feats_vals[ind])] = 1 
-
-				current_captions = current_batch['caption'].values 
+                current_captions = current_batch['caption'].values 
             
-			
             current_caption_ind = map(lambda cap: [wordtoix[word] for word in cap.lower().split(' ') if word in wordtoix], current_captions)  
 
             current_caption_matrix = sequence.pad_sequences(current_caption_ind, padding='post', maxlen=n_frame_step-1) 
@@ -373,7 +370,7 @@ if __name__ == '__main__':
     learning_rate = dic_param.get('learning_rate')
     batch_size = dic_param.get('batch_size')
     
-	
+
     cnn_name = 'resnet50_keras_feature_no_sub_mean'
     
     
@@ -381,20 +378,7 @@ if __name__ == '__main__':
     dim_image = net_dic_param.get('dim_image')
     train_path = net_dic_param.get('train_path')
     
-#     if cnn_name == 'resnet':
-#         dim_image = 2048  ## ResNet
-#         train_file = '/home/anguyen/workspace/dataset/Breakfast/v2c_dataset/train_test_split/train_resnet50.pkl'  ## ResNet feature
-#         
-#     elif cnn_name == 'vgg19':
-#         dim_image = 4096 ## VGG
-#         train_file = '/home/anguyen/workspace/dataset/Breakfast/v2c_dataset/train_test_split/train_vgg19.pkl'  ## ResNet feature
-#     
-#     elif cnn_name == 'restnet_no_mean':
-#         dim_image = 2048 ## ResNet
-#         train_file = '/home/anguyen/workspace/dataset/Breakfast/v2c_dataset/train_test_split/train_resnet50_no_sub_mean.pkl'  ## ResNet feature
-        
     net_id = 'BasicLSTM_' + cnn_name + '_batchsize' + str(batch_size) + '_dimhidden' + str(dim_hidden) + '_learningrate' + str(learning_rate)
-
     
     
     print 'START TRANING ...'
