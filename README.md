@@ -1,6 +1,7 @@
 ## [Translating Videos to Commands for Robotic Manipulation with Deep Recurrent Neural Networks](https://arxiv.org/pdf/1710.00290.pdf)
 By A Nguyen et al. - ICRA 2018
-![video2command](https://github.com/nqanh/video2command/blob/master/mics/Video2command.jpg "video2command")
+
+![video2command](https://github.com/nqanh/video2command/blob/master/mics/Video2command.jpg =200x80 "video2command")
 
 ### Requirements
 - Tensorflow >= 1.0 (used 1.1.0)
