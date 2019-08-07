@@ -11,7 +11,7 @@ By A Nguyen et al. - ICRA 2018
 - Clone the repository to your `$VC_Folder`
 - We train the network using [IIT-V2C dataset](https://sites.google.com/site/iitv2c/)
 - You can extract the features for each frames in the input videos using any network (e.g., VGG, ResNet, etc.)
-- For a quick start, the pre-extracted features with ResNet50 is available [here](#). 
+- For a quick start, the pre-extracted features with ResNet50 is available [here](https://drive.google.com/file/d/1Y_YKHB4Bw6MPXj05S36d1G_3rMx73Uv5/view?usp=sharing). 
 - Extract the file you downloaded to `$VC_Folder/data`
 - Start training: `python train.py` in `$VC_Folder/main`
 
